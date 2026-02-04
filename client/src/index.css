@@ -1,0 +1,138 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Sora:wght@300;400;600;700&display=swap");
+
+:root {
+  --bg-1: #f3f7ff;
+  --bg-2: #fef6f0;
+  --bg-3: #ecfff7;
+  --surface: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.8);
+  --text: #1c2230;
+  --muted: #5d6b82;
+  --accent: #2f7bff;
+  --accent-2: #11c48b;
+  --shadow: 0 14px 40px rgba(31, 47, 88, 0.12);
+  --glow: 0 0 0 1px rgba(47, 123, 255, 0.08), 0 12px 30px rgba(47, 123, 255, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: radial-gradient(1000px 600px at 10% -10%, var(--bg-3), transparent 60%),
+    radial-gradient(800px 600px at 90% 10%, var(--bg-2), transparent 55%),
+    linear-gradient(135deg, var(--bg-1), #ffffff 40%, #f8fbff 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-main {
+  animation: floatIn 700ms ease forwards;
+}
+
+.card-surface {
+  background: var(--surface-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 50, 90, 0.08);
+  box-shadow: var(--shadow);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.card-surface:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glow);
+}
+
+.accent-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.accent-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(47, 123, 255, 0.12), rgba(17, 196, 139, 0.08));
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.accent-border:hover::after {
+  opacity: 1;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  background: radial-gradient(900px 600px at 0% 0%, #e9f5ff, transparent 60%),
+    radial-gradient(700px 500px at 100% 20%, #ffe8d7, transparent 55%),
+    linear-gradient(135deg, #f7f9ff, #ffffff 45%, #f2fff9 100%);
+}
+
+.auth-card {
+  background: var(--surface-glass);
+  border-radius: 18px;
+  padding: 32px 34px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(30, 50, 90, 0.08);
+  animation: floatIn 700ms ease forwards;
+}
+
+.auth-hero {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  min-height: 420px;
+  box-shadow: var(--shadow);
+}
+
+.auth-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(130deg, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.02));
+}
+
+.auth-hero-content {
+  position: relative;
+  z-index: 1;
+  color: #0b1220;
+}
+
+.soft-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(47, 123, 255, 0.12);
+  color: #1a4fb8;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
