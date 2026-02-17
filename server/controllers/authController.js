@@ -24,21 +24,67 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  // Check if there are any users in the database
+  const { name, email, phoneNumber, password } = req.body;
+
+  console.log("Signup attempt:", { name, email, phoneNumber }); // Debug log
+
+  // Check if user with same email already exists
+  const existingUserByEmail = await User.findOne({ email });
+  console.log("Existing user by email:", existingUserByEmail); // Debug log
+  
+  if (existingUserByEmail) {
+    console.log("Email already exists, returning error"); // Debug log
+    return next(new AppError(`Email "${email}" is already registered. Please use a different email address.`, 400));
+  }
+
+  // Check if user with same phone number already exists
+  const existingUserByPhone = await User.findOne({ phoneNumber });
+  console.log("Existing user by phone:", existingUserByPhone); // Debug log
+  
+  if (existingUserByPhone) {
+    console.log("Phone already exists, returning error"); // Debug log
+    return next(new AppError(`Phone number "${phoneNumber}" is already registered. Please use a different phone number.`, 400));
+  }
+
+  // Check if there are any users in database
   const userCount = await User.countDocuments();
 
-  // Determine if the current user being added is the first user
+  // Determine if current user being added is the first user
   const isAdmin = userCount === 0;
 
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    phoneNumber: req.body.phoneNumber,
-    password: req.body.password,
-    isAdmin,
-  });
-
-  createSendToken(newUser, 201, res);
+  console.log("Creating new user..."); // Debug log
+  
+  try {
+    const newUser = await User.create({
+      name,
+      email,
+      phoneNumber,
+      password,
+      isAdmin,
+    });
+    createSendToken(newUser, 201, res);
+  } catch (error) {
+    console.log("User.create error:", error); // Debug log
+    
+    // Handle MongoDB duplicate key errors specifically
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      const value = error.keyValue[field];
+      
+      let message;
+      if (field === 'email') {
+        message = `Email "${value}" is already registered. Please use a different email address.`;
+      } else if (field === 'phoneNumber') {
+        message = `Phone number "${value}" is already registered. Please use a different phone number.`;
+      } else {
+        message = `Duplicate ${field}: "${value}". Please use another value!`;
+      }
+      
+      return next(new AppError(message, 400));
+    }
+    
+    return next(error);
+  }
 });
 
 exports.login = catchAsync(async (req, res, next) => {

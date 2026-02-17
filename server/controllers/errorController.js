@@ -6,7 +6,21 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFieldsDB = (err) => {
-  const message = `Duplicate field value: \"${err.keyValue.name}"\. Please use another value!`;
+  console.log("Duplicate key error caught:", err); // Debug log
+  
+  const field = Object.keys(err.keyValue)[0];
+  const value = err.keyValue[field];
+  
+  let message;
+  if (field === 'email') {
+    message = `Email "${value}" is already registered. Please use a different email address.`;
+  } else if (field === 'phoneNumber') {
+    message = `Phone number "${value}" is already registered. Please use a different phone number.`;
+  } else {
+    message = `Duplicate ${field}: "${value}". Please use another value!`;
+  }
+  
+  console.log("Generated error message:", message); // Debug log
   return new AppError(message, 400);
 };
 
@@ -53,10 +67,20 @@ const sendErrorProd = (err, res) => {
 };
 
 module.exports = (err, req, res, next) => {
+  console.log("Global error handler called with:", err); // Debug log
+  console.log("Error code:", err.code); // Debug log
+  console.log("Error name:", err.name); // Debug log
+  
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
   if (process.env.NODE_ENV === "development") {
+    if (err.name === "CastError") err = handleCastErrorDB(err);
+    if (err.code === 11000) err = handleDuplicateFieldsDB(err);
+    if (err.name === "ValidationError") err = handleValidationErrorDB(err);
+    if (err.name === "JsonWebTokenError") err = handleJWTError();
+    if (err.name === "TokenExpiredError") err = handleJWTExpiredError();
+    
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
     if (err.name === "CastError") err = handleCastErrorDB(err);

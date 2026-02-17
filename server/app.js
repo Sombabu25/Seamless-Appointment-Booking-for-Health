@@ -10,6 +10,7 @@ const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
 const doctorRouter = require("./routes/doctorRoutes");
+const appointmentRouter = require("./routes/appointmentRoutes");
 
 const corsOptions = {
   origin: "*",
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 // ROUTES
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/doctors", doctorRouter);
+app.use("/api/v1/appointments", appointmentRouter);
 
 // PRODUCTION SETUP
 if (process.env.NODE_ENV === "production") {

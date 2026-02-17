@@ -6,18 +6,48 @@ const Appointment = require("../models/appointmentModel");
 const moment = require("moment");
 
 exports.doctorSignup = catchAsync(async (req, res, next) => {
-  // find doctor if already applied
-  const doctor = await Doctor.findOne({ email: req.body.email });
-  if (doctor)
-    return next(
-      new AppError(
-        "Doctor already applied Please contact your admin clinic",
-        400
-      )
-    );
+  const { email, phoneNumber } = req.body;
+
+  // Check if doctor with same email already applied
+  const existingDoctorByEmail = await Doctor.findOne({ email });
+  if (existingDoctorByEmail) {
+    return next(new AppError(`A doctor with email "${email}" has already applied. Please contact your admin clinic.`, 400));
+  }
+
+  // Check if doctor with same phone number already applied
+  if (phoneNumber) {
+    const existingDoctorByPhone = await Doctor.findOne({ phoneNumber });
+    if (existingDoctorByPhone) {
+      return next(new AppError(`A doctor with phone number "${phoneNumber}" has already applied. Please use a different phone number.`, 400));
+    }
+  }
 
   const newDoctor = new Doctor({ ...req.body, status: "pending" });
-  await newDoctor.save();
+  
+  try {
+    await newDoctor.save();
+  } catch (error) {
+    console.log("Doctor.create error:", error); // Debug log
+    
+    // Handle MongoDB duplicate key errors specifically
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      const value = error.keyValue[field];
+      
+      let message;
+      if (field === 'email') {
+        message = `A doctor with email "${value}" has already applied. Please contact your admin clinic.`;
+      } else if (field === 'phoneNumber') {
+        message = `A doctor with phone number "${value}" has already applied. Please use a different phone number.`;
+      } else {
+        message = `Duplicate ${field}: "${value}". Please use another value!`;
+      }
+      
+      return next(new AppError(message, 400));
+    }
+    
+    return next(error);
+  }
 
   const adminUser = await User.findOne({ isAdmin: true });
 
